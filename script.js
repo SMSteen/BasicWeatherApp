@@ -11,7 +11,7 @@ function formatDate(date) {
     return strTime;
 }
 function windDirection(windDeg){
-    var direction = "";
+    let direction = "";
     if(windDeg>=11.25 && windDeg <33.75){direction ="NNE";}
     else if(windDeg>=33.75 && windDeg <56.25){direction ="NE";}
     else if(windDeg<78.75){direction ="ENE";}
@@ -30,37 +30,55 @@ function windDirection(windDeg){
     else{direction ="N";}
     return direction;
 }
+
+function showWeather(results){
+    let htmlStr = `
+        <h1>${results.name}</h1>
+        <h5>as of ${formatDate(new Date())}</h5>
+        <div>
+            <img src='${"http://openweathermap.org/img/w/" + results.weather[0].icon + ".png"}'>
+            <h2>${Number.parseFloat(results.main.temp).toFixed(0)}&deg F</h2>
+            <p id='desc'>${results.weather[0].description}</p>
+        </div>
+        <ul>
+            <li>Humidity: <span>${results.main.humidity}%</span></li>
+            <li>Barometric Pressure: <span>${Number.parseFloat(results.main.pressure/33.863886666667).toFixed(2)} in</span></li>
+            <li>Cloud Cover: <span>${results.clouds.all}%</span></li>
+            <li>Winds: <span>${Number.parseFloat(results.wind.speed).toFixed(0)} mph ${windDirection(results.wind.deg)}</span></li>
+        </ul>
+        <p>Sunrise <span>${formatDate(new Date((results.sys.sunrise)*1000))}</span></p>
+        <p>Sunset <span>${formatDate(new Date((results.sys.sunset)*1000))}</span></p>  
+    `;
+    $("#weather-report").html(htmlStr);
+    window.localStorage.setItem('myWeather', htmlStr)
+    window.localStorage.setItem('timeReq', formatDate(new Date()))
+}
+
 $(document).ready(function(){
+    if(window.localStorage.length == 0){ //user has not visited page before
+        $("form").before("<h3>Welcome to the WeatherApp!</h3>")
+    } else{
+        $("form").before(`<h3>Welcome back!</h3><h4 class="old-weather">last weather report requested at ${window.localStorage.getItem("timeReq")}.</h4>`);
+        $("#weather-report").html(window.localStorage.getItem("myWeather"));
+    }
     $("form").submit(function(event){
         event.preventDefault();
+        //remove old weather report
+        $(".old-weather").remove();
         //variables for URL construction
-        var baseURL = "http://api.openweathermap.org/data/2.5/weather?q=";
-        var params = $("input[name='search-city']").val() + "&units=imperial&APPID=62d4f3416197c4cb81ec998da8c52aa1";
-        $.get(baseURL + params, function(data){
-            // variables for converting JSON data received
-            var windDir = windDirection(data.wind.deg);
-            var sunset = formatDate(new Date((data.sys.sunset)*1000));
-            var sunrise = formatDate(new Date((data.sys.sunrise)*1000));
-            var baroPressure = Number.parseFloat(data.main.pressure/33.863886666667).toFixed(2);
-            var temperature = Number.parseFloat(data.main.temp).toFixed(0);
-            var iconURL = "http://openweathermap.org/img/w/" + data.weather[0].icon + ".png";
-            var htmlStr = `
-                <h1>${data.name}</h1>
-                <div>
-                    <img src='${iconURL}'>
-                    <h2>${temperature}&deg F</h2>
-                    <p id='desc'>${data.weather[0].description}</p>
-                </div>
-                <ul>
-                    <li>Humidity: <span>${data.main.humidity}%</span></li>
-                    <li>Barometric Pressure: <span>${baroPressure}</span> in</li>
-                    <li>Cloud Cover: <span>${data.clouds.all}%</span></li>
-                </ul>
-                <p>Sunrise <span>${sunrise}</span></p>
-                <p>Sunset <span>${sunset}</span></p>  
-            `;
-            $("#weather-report").html(htmlStr);
-            $("input[name='search-city']").val("");
-        }, 'json');
+        let baseURL = "http://api.openweathermap.org/data/2.5/weather?q=";
+        let params = $("#city").val() + "&units=imperial&APPID=62d4f3416197c4cb81ec998da8c52aa1";
+        let errorMsg = `
+            <p class="text-danger">Oops, something went wrong with this request. If the URL is correct, there could be an issue with the server. Please try again at a later time.</p>
+        `;
+
+        //create a promise for get (weather) request
+        var getTheWeather = Promise.resolve($.getJSON(baseURL+params));
+        getTheWeather.then(function(response){
+            console.log(new Date())
+            showWeather(response);
+        }).catch(function(jqXHR){
+            $("#weather-report").html(errorMsg);
+        });
     });
 });

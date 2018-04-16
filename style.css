@@ -1,26 +1,30 @@
-*{
-    margin: 0px;
-    padding: 0px;
+.container-fluid{ /* tweak container margins/padding */
+    padding: 25px;
 }
-form{
-    margin: 20px;
+form{   /* if opting formatting form instead of fieldset/legend */
+    width: 55%;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 265px 1fr;
+    background: linear-gradient(to bottom, #85adad, #f2fcfe);
+    box-shadow: 3px 3px 3px #252525;
 }
 #city{
-    width: 250px;
     padding: 5px;
     font-size: 110%;
     font-style: italic;
-    color: #002244;
+    color: #334d4d;
 }
-input[type="submit"]{
-    margin: 10px;
+input[type='submit']{
+    width: fit-content;
     padding: 5px 10px;
+    color: #334d4d;
+    border: 1px solid #334d4d;
     border-radius: 5px;
-    border: 1px solid #002244;
-    color: #002244;
-    font-size: 120%;
+    box-shadow: 1px 2px 3px #252525;
+    margin: 10px auto 0px auto;
     font-weight: bold;
-    font-style: italic;
+    cursor: pointer;
 }
 #weather-report{
     display: inline-block;
@@ -34,6 +38,17 @@ input[type="submit"]{
 h1{
     text-align: center;
     color: #002244;
+}
+h3, h4, h5{
+    color: #334d4d;
+}
+h4, h5{
+    font-style: italic;
+    margin: 0px 0px 5px 0px;
+}
+h5{
+    text-align: center;
+    margin: 0px;
 }
 img{
     display: block;
@@ -66,5 +81,6 @@ ul{
     color: #002244;
 }
 p{
-    margin-left: 20px;
+    margin-left: 20%;
+    margin-bottom: 0px;
 }
